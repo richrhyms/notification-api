@@ -2,7 +2,7 @@ package com.richotaru.notificationapi.configuration;
 
 
 
-import com.richotaru.notificationapi.enums.NotificationType;
+import com.richotaru.notificationapi.enums.MessageDeliveryChannelConstant;
 import com.richotaru.notificationapi.service.PricingPlanService;
 import io.github.bucket4j.*;
 import io.github.bucket4j.grid.GridBucketState;
@@ -20,13 +20,13 @@ import java.util.function.Supplier;
 public class RateLimitInterceptor implements HandlerInterceptor {
 
     private final ProxyManager<String> buckets;
-    private final NotificationType notificationType;
+    private final MessageDeliveryChannelConstant messageDeliveryChannelConstant;
     private final PricingPlanService pricingPlanService;
 
-    public RateLimitInterceptor(Cache<String, GridBucketState> cache, NotificationType type, PricingPlanService pricingPlanService) {
+    public RateLimitInterceptor(Cache<String, GridBucketState> cache, MessageDeliveryChannelConstant type, PricingPlanService pricingPlanService) {
         this.buckets = Bucket4j.extension(JCache.class)
                 .proxyManagerForCache(cache);
-        this.notificationType =type;
+        this.messageDeliveryChannelConstant =type;
         this.pricingPlanService = pricingPlanService;
     }
 
@@ -58,7 +58,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
     private Supplier<BucketConfiguration> getConfigurationsFromName(String apiKey) {
         return () -> Bucket4j.configurationBuilder()
-                .addLimit(pricingPlanService.resolveBandWidthFromApiKeyAndType(apiKey,notificationType))
+                .addLimit(pricingPlanService.resolveBandWidthFromApiKeyAndType(apiKey, messageDeliveryChannelConstant))
                 .build();
     }
 }

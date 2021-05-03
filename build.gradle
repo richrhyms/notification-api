@@ -47,6 +47,8 @@ dependencies {
 	implementation "com.hazelcast:hazelcast-spring"
 	implementation group: "com.twilio.sdk", name: "twilio", version: "7.53.0"
 	implementation group: 'com.googlecode.libphonenumber', name: 'libphonenumber', version: '8.10.20'
+	implementation "javax.validation:validation-api:2.0.0.Final"
+
 //	implementation 'org.freemarker:freemarker:2.3.23'
 
 }

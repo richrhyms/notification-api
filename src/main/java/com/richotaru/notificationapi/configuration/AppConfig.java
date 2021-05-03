@@ -1,6 +1,6 @@
 package com.richotaru.notificationapi.configuration;
 
-import com.richotaru.notificationapi.enums.NotificationType;
+import com.richotaru.notificationapi.enums.MessageDeliveryChannelConstant;
 import com.richotaru.notificationapi.service.PricingPlanService;
 import io.github.bucket4j.grid.GridBucketState;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +20,9 @@ public class AppConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new RateLimitInterceptor(cache, NotificationType.EMAIL, pricingPlanService))
+        registry.addInterceptor(new RateLimitInterceptor(cache, MessageDeliveryChannelConstant.EMAIL, pricingPlanService))
                 .addPathPatterns("/api/v1/notification/email/**");
-        registry.addInterceptor(new RateLimitInterceptor(cache, NotificationType.SMS, pricingPlanService))
+        registry.addInterceptor(new RateLimitInterceptor(cache, MessageDeliveryChannelConstant.SMS, pricingPlanService))
                 .addPathPatterns("/api/v1/notification/sms/**");
     }
 }

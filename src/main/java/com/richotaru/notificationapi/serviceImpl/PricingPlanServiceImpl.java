@@ -1,6 +1,6 @@
 package com.richotaru.notificationapi.serviceImpl;
 
-import com.richotaru.notificationapi.enums.NotificationType;
+import com.richotaru.notificationapi.enums.MessageDeliveryChannelConstant;
 import com.richotaru.notificationapi.service.PricingPlanService;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Refill;
@@ -25,12 +25,12 @@ public class PricingPlanServiceImpl implements PricingPlanService {
     private Long smsRequestLimitProf;
 
     @Override
-    public Bandwidth resolveBandWidthFromApiKeyAndType(String apiKey,NotificationType type) {
+    public Bandwidth resolveBandWidthFromApiKeyAndType(String apiKey, MessageDeliveryChannelConstant type) {
         com.richotaru.notificationapi.enums.PricingPlan plan = getPricingPlan(apiKey);
         return getLimit(plan,type);
     }
-    private Bandwidth getLimit(com.richotaru.notificationapi.enums.PricingPlan plan, NotificationType type) {
-        if(type == NotificationType.SMS){
+    private Bandwidth getLimit(com.richotaru.notificationapi.enums.PricingPlan plan, MessageDeliveryChannelConstant type) {
+        if(type == MessageDeliveryChannelConstant.SMS){
             if(plan == com.richotaru.notificationapi.enums.PricingPlan.FREE){
                 return Bandwidth.classic(smsRequestLimitFree, Refill.intervally(smsRequestLimitFree, Duration.ofMinutes(1)));
             }
@@ -41,7 +41,7 @@ public class PricingPlanServiceImpl implements PricingPlanService {
                 return Bandwidth.classic(smsRequestLimitProf, Refill.intervally(smsRequestLimitFree, Duration.ofMinutes(1)));
             }
         }
-        if(type == NotificationType.EMAIL){
+        if(type == MessageDeliveryChannelConstant.EMAIL){
             if(plan == com.richotaru.notificationapi.enums.PricingPlan.FREE) {
                 return Bandwidth.classic(emailRequestLimitFree, Refill.intervally(emailRequestLimitFree, Duration.ofMinutes(1)));
             }

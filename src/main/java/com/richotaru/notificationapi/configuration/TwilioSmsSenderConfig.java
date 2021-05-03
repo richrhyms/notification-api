@@ -12,5 +12,6 @@ public class TwilioSmsSenderConfig {
     private String ACCOUNT_SID;
     @Value("${TWILIO_AUTH_TOKEN:AC4d6 }")
     private String AUTH_TOKEN;
-
+    @Value("${TWILIO_SENDER_NUMBER:+2347089786721}")
+    private String SENDER_NUMBER;
 }

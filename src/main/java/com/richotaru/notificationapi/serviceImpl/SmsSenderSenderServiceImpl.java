@@ -13,6 +13,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 
 @Service
 public class SmsSenderSenderServiceImpl implements SmsSenderService {
@@ -36,7 +37,6 @@ public class SmsSenderSenderServiceImpl implements SmsSenderService {
         if (SMS_PROVIDER == SmsProviderConstant.TWILIO) {
             try {
                 Twilio.init(twilioSmsSenderConfig.getACCOUNT_SID(), twilioSmsSenderConfig.getAUTH_TOKEN());
-//                TWILIO_SENDER = settingService.getString("TWILIO_SENDER", "+12163500912");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -45,14 +45,11 @@ public class SmsSenderSenderServiceImpl implements SmsSenderService {
     }
 
     @Override
-    public void sendSms(String message, String from, SmsProviderConstant provider, String... recipients) {
-        if(provider != null){
-            SMS_PROVIDER = provider;
-        }
+    public void sendSms(String message, List<String> recipients) {
         if (SMS_PROVIDER == SmsProviderConstant.TWILIO) {
             for (String recipient : recipients) {
                 Message.creator(new PhoneNumber(recipient), // to
-                        new PhoneNumber(from), // from
+                        new PhoneNumber(twilioSmsSenderConfig.getSENDER_NUMBER()), // from
                         message)
                         .create();
             }

@@ -1,7 +1,7 @@
 package com.richotaru.notificationapi.enums;
 
 
-public enum NotificationType {
+public enum MessageDeliveryChannelConstant {
     SMS,
     EMAIL,
     OTHER;

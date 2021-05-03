@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class EmailConfig {
     @Value("${EMAIL_NOTIFICATION_ADDRESS:info@irembo.com}")
     public String EMAIL_NOTIFICATION_ADDRESS;
-    @Value("${NOTIFICATION_EMAIL_PASSWORD:API-KEY-de3f47db99fe65cf51ea8747effc3e5c}")
+    @Value("${EMAIL_NOTIFICATION_PASSWORD:API-KEY-de3f47db99fe65cf51ea8747effc3e5c}")
     public String EMAIL_NOTIFICATION_PASSWORD;
     @Value("${SMTP_PORT:587}")
     public Integer SMTP_PORT;
