@@ -11,17 +11,17 @@ import java.time.Duration;
 
 @Service
 public class PricingPlanServiceImpl implements PricingPlanService {
-    @Value("${EMAIL_LIMIT_FREE:40}")
+    @Value("${EMAIL_LIMIT_FREE:2}")
     private Long emailRequestLimitFree;
-    @Value("${EMAIL_LIMIT_BASIC:60}")
+    @Value("${EMAIL_LIMIT_BASIC:8}")
     private Long emailRequestLimitBasic;
-    @Value("${EMAIL_LIMIT_PROF:100}")
+    @Value("${EMAIL_LIMIT_PROF:10}")
     private Long emailRequestLimitProf;
-    @Value("${SMS_LIMIT_FREE:20}")
+    @Value("${SMS_LIMIT_FREE:2}")
     private Long smsRequestLimitFree;
-    @Value("${SMS_LIMIT_BASIC:30}")
+    @Value("${SMS_LIMIT_BASIC:6}")
     private Long smsRequestLimitBasic;
-    @Value("${SMS_LIMIT_PROF:60}")
+    @Value("${SMS_LIMIT_PROF:8}")
     private Long smsRequestLimitProf;
 
     @Override

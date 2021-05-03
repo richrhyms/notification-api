@@ -18,5 +18,5 @@ public class EmailRequestDto {
     @NotBlank(message = "message cannot be blank")
     private String message;
     @Min(value = 1, message = "You must provide at least one recipient email")
-    private List<@Email String> recipientEmails;
+    private List<String> recipientEmails;
 }
