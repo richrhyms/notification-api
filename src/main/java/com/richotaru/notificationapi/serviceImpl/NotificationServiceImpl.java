@@ -1,9 +1,7 @@
 package com.richotaru.notificationapi.serviceImpl;
 
-import com.richotaru.notificationapi.configuration.TwilioSmsSenderConfig;
 import com.richotaru.notificationapi.domain.dto.EmailRequestDto;
 import com.richotaru.notificationapi.domain.dto.SmsRequestDto;
-import com.richotaru.notificationapi.enums.SmsProviderConstant;
 import com.richotaru.notificationapi.service.MailService;
 import com.richotaru.notificationapi.service.NotificationService;
 import com.richotaru.notificationapi.service.SmsSenderService;
@@ -42,7 +40,6 @@ public class NotificationServiceImpl implements NotificationService {
        }catch (Exception e){
             e.printStackTrace();
        }
-
 
     }
 }

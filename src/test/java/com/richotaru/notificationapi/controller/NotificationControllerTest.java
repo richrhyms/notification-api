@@ -24,6 +24,8 @@ class NotificationControllerTest  extends IntegrationTest {
     //Test to ensure a free account can not send beyond the sp
     @Test
     void sendEmailNotificationAsFreeAccount() throws Exception {
+
+
         EmailRequestDto dto = new EmailRequestDto();
         dto.setSenderName("Test Sender");
         dto.setSenderEmail("test@email.com");
@@ -32,7 +34,6 @@ class NotificationControllerTest  extends IntegrationTest {
         List<String> recipient = new ArrayList<>();
         recipient.add("me@irembo.com");
         dto.setRecipientEmails(recipient);
-
         for(int i=0; i< emailRequestLimitFree; i++){
             //Expected Okay
             mockMvc.perform(
@@ -57,6 +58,7 @@ class NotificationControllerTest  extends IntegrationTest {
         List<String> recipient = new ArrayList<>();
         recipient.add("07032804231");
         dto.setRecipientPhoneNumbers(recipient);
+
         for(int i=0; i< smsRequestLimitFree; i++){
             //Expected Okay
             mockMvc.perform(
