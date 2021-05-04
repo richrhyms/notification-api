@@ -83,7 +83,7 @@ public class DefaultClientSetup {
                                 clientSystem.setSubscriptionPlan(subscriptionPlan);
 
                                 // GENERATING FAKE API-KEY
-                                clientSystem.setApiKey("api-key-742ee7e5-2a9a428a");
+                                clientSystem.setApiKey("api-key-752ee7e5-2a9a428a");
                                 appRepository.persist(clientSystem);
                                 return null;
                             });
