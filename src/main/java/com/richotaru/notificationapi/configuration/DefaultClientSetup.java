@@ -28,6 +28,10 @@ public class DefaultClientSetup {
     private Long emailRequestLimitProf;
     @Value("${EMAIL_LIMIT_BASIC:600}")
     private Long emailRequestLimitBasic;
+    @Value("${SMS_LIMIT_PROF:600}")
+    private Long smsRequestLimitProf;
+    @Value("${SMS_LIMIT_BASIC:300}")
+    private Long smsRequestLimitBasic;
     private final TransactionTemplate transactionTemplate;
     private final ClientAccountRepository clientAccountRepository;
     private final SubscriptionPlanRepository subscriptionPlanRepository;
@@ -59,7 +63,8 @@ public class DefaultClientSetup {
                                             SubscriptionPlan plan =  new SubscriptionPlan();
                                             plan.setName(PricingPlan.PROFESSIONAL.name());
                                             plan.setDescription(PricingPlan.PROFESSIONAL.name() + " Service");
-                                            plan.setMaxMonthlyLimit(emailRequestLimitProf);
+                                            plan.setMaxMonthlyEmailLimit(emailRequestLimitProf);
+                                            plan.setMaxMonthlySmsLimit(smsRequestLimitProf);
                                             plan.setStatus(GenericStatusConstant.ACTIVE);
                                             plan.setDateDeactivated(LocalDateTime.now());
                                             plan.setCreatedAt(LocalDateTime.now());
@@ -93,7 +98,8 @@ public class DefaultClientSetup {
                                                 SubscriptionPlan plan =  new SubscriptionPlan();
                                                 plan.setName(PricingPlan.BASIC.name());
                                                 plan.setDescription(PricingPlan.BASIC.name() + " Service");
-                                                plan.setMaxMonthlyLimit(emailRequestLimitBasic);
+                                                plan.setMaxMonthlyEmailLimit(emailRequestLimitBasic);
+                                                plan.setMaxMonthlySmsLimit(smsRequestLimitBasic);
                                                 plan.setStatus(GenericStatusConstant.ACTIVE);
                                                 plan.setDateDeactivated(LocalDateTime.now());
                                                 plan.setCreatedAt(LocalDateTime.now());
