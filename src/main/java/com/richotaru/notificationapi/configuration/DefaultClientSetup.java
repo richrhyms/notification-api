@@ -24,13 +24,13 @@ import java.time.LocalDateTime;
 
 @Component
 public class DefaultClientSetup {
-    @Value("${EMAIL_LIMIT_PROF:1200}")
+    @Value("${EMAIL_LIMIT_PROF:1800000}")
     private Long emailRequestLimitProf;
-    @Value("${EMAIL_LIMIT_BASIC:600}")
+    @Value("${EMAIL_LIMIT_BASIC:180000}")
     private Long emailRequestLimitBasic;
-    @Value("${SMS_LIMIT_PROF:600}")
+    @Value("${SMS_LIMIT_PROF:1200000}")
     private Long smsRequestLimitProf;
-    @Value("${SMS_LIMIT_BASIC:300}")
+    @Value("${SMS_LIMIT_BASIC:120000}")
     private Long smsRequestLimitBasic;
     private final TransactionTemplate transactionTemplate;
     private final ClientAccountRepository clientAccountRepository;

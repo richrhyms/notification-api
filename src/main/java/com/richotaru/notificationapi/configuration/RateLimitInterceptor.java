@@ -14,6 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.cache.Cache;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 import java.util.function.Supplier;
 
 
@@ -23,7 +24,9 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     private final MessageDeliveryChannelConstant messageDeliveryChannelConstant;
     private final PricingPlanService pricingPlanService;
 
-    public RateLimitInterceptor(Cache<String, GridBucketState> cache, MessageDeliveryChannelConstant type, PricingPlanService pricingPlanService) {
+    public RateLimitInterceptor(Cache<String, GridBucketState> cache,
+                                MessageDeliveryChannelConstant type,
+                                PricingPlanService pricingPlanService) {
         this.buckets = Bucket4j.extension(JCache.class)
                 .proxyManagerForCache(cache);
         this.messageDeliveryChannelConstant =type;
@@ -35,11 +38,6 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                              Object handler) throws Exception {
 
         String apiKey = request.getHeader("X-api-key");
-        if (apiKey == null || apiKey.isEmpty()) {
-            response.sendError(HttpStatus.BAD_REQUEST.value(), "Missing Header: X-api-key");
-            return false;
-        }
-
         Bucket tokenBucket = resolveBucket(apiKey);
         ConsumptionProbe probe = tokenBucket.tryConsumeAndReturnRemaining(1);
         if (probe.isConsumed()) {
@@ -54,11 +52,15 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
     }
     public Bucket resolveBucket(String apiKey) {
-        return buckets.getProxy(apiKey, getConfigurationsFromName(apiKey));
+        return buckets.getProxy(apiKey + messageDeliveryChannelConstant.ordinal(),
+                getConfigurationsFromName(apiKey));
     }
     private Supplier<BucketConfiguration> getConfigurationsFromName(String apiKey) {
-        return () -> Bucket4j.configurationBuilder()
-                .addLimit(pricingPlanService.resolveBandWidthFromApiKeyAndType(apiKey, messageDeliveryChannelConstant))
-                .build();
+        ConfigurationBuilder configurationBuilder = Bucket4j.configurationBuilder();
+        List<Bandwidth> bandwidths = pricingPlanService.resolveBandWidthFromApiKeyAndType(apiKey, messageDeliveryChannelConstant);
+        for(Bandwidth bandwidth: bandwidths){
+            configurationBuilder.addLimit(bandwidth);
+        }
+        return configurationBuilder::build;
     }
 }

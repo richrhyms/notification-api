@@ -11,7 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ClientAccountRepository extends JpaRepository<ClientAccount, Long> {
 
-    @Query("select ca from ClientAccount ca" +
+    @Query("select ca from ClientAccount ca JOIN FETCH ca.subscriptionPlan sp " +
             " where lower(ca.apiKey) = lower(?1) AND ca.status =?2 ")
     Optional<ClientAccount> findByApiKeyAndStatus(String apiKey, GenericStatusConstant constant);
 

@@ -24,13 +24,13 @@ public class NotificationController {
 
     @PostMapping("email")
     public ResponseEntity<String> sendEmailNotification(@Valid @RequestBody EmailRequestDto requestDto){
-        notificationService.sendEmail(requestDto);
-    return ResponseEntity.status(HttpStatus.OK).build();
+//        notificationService.sendEmail(requestDto);
+    return ResponseEntity.status(HttpStatus.OK).body("Email Sent");
     }
 
     @PostMapping("sms")
     public ResponseEntity<String> sendSmsNotification(@Valid @RequestBody SmsRequestDto requestDto){
-        notificationService.sendSms(requestDto);
-        return ResponseEntity.status(HttpStatus.OK).build();
+//        notificationService.sendSms(requestDto);
+        return ResponseEntity.status(HttpStatus.OK).body("SMS Sent");
     }
 }

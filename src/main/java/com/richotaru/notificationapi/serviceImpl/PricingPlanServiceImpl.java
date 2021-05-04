@@ -1,67 +1,112 @@
 package com.richotaru.notificationapi.serviceImpl;
 
+import com.richotaru.notificationapi.dao.ClientAccountRepository;
+import com.richotaru.notificationapi.entity.ClientAccount;
+import com.richotaru.notificationapi.entity.SubscriptionPlan;
+import com.richotaru.notificationapi.enumeration.GenericStatusConstant;
 import com.richotaru.notificationapi.enums.MessageDeliveryChannelConstant;
 import com.richotaru.notificationapi.service.PricingPlanService;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Refill;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PricingPlanServiceImpl implements PricingPlanService {
     @Value("${EMAIL_LIMIT_FREE:2}")
     private Long emailRequestLimitFree;
-    @Value("${EMAIL_LIMIT_BASIC:8}")
-    private Long emailRequestLimitBasic;
-    @Value("${EMAIL_LIMIT_PROF:10}")
-    private Long emailRequestLimitProf;
     @Value("${SMS_LIMIT_FREE:2}")
     private Long smsRequestLimitFree;
-    @Value("${SMS_LIMIT_BASIC:6}")
-    private Long smsRequestLimitBasic;
-    @Value("${SMS_LIMIT_PROF:8}")
-    private Long smsRequestLimitProf;
+
+    @Autowired
+    private ClientAccountRepository clientAccountRepository;
 
     @Override
-    public Bandwidth resolveBandWidthFromApiKeyAndType(String apiKey, MessageDeliveryChannelConstant type) {
-        com.richotaru.notificationapi.enums.PricingPlan plan = getPricingPlan(apiKey);
-        return getLimit(plan,type);
-    }
-    private Bandwidth getLimit(com.richotaru.notificationapi.enums.PricingPlan plan, MessageDeliveryChannelConstant type) {
+    public List<Bandwidth> resolveBandWidthFromApiKeyAndType(String apiKey, MessageDeliveryChannelConstant type) {
         if(type == MessageDeliveryChannelConstant.SMS){
-            if(plan == com.richotaru.notificationapi.enums.PricingPlan.FREE){
-                return Bandwidth.classic(smsRequestLimitFree, Refill.intervally(smsRequestLimitFree, Duration.ofMinutes(1)));
-            }
-            if(plan == com.richotaru.notificationapi.enums.PricingPlan.BASIC){
-                return Bandwidth.classic(smsRequestLimitBasic, Refill.intervally(smsRequestLimitFree, Duration.ofMinutes(1)));
-            }
-            if(plan == com.richotaru.notificationapi.enums.PricingPlan.PROFESSIONAL){
-                return Bandwidth.classic(smsRequestLimitProf, Refill.intervally(smsRequestLimitFree, Duration.ofMinutes(1)));
-            }
+           return getClientSmsBandWidths(apiKey);
+        }else {
+            return getClientEmailBandWidths(apiKey);
         }
-        if(type == MessageDeliveryChannelConstant.EMAIL){
-            if(plan == com.richotaru.notificationapi.enums.PricingPlan.FREE) {
-                return Bandwidth.classic(emailRequestLimitFree, Refill.intervally(emailRequestLimitFree, Duration.ofMinutes(1)));
-            }
-            if(plan == com.richotaru.notificationapi.enums.PricingPlan.BASIC){
-                return Bandwidth.classic(emailRequestLimitBasic, Refill.intervally(emailRequestLimitBasic, Duration.ofMinutes(1)));
-            }
-            if(plan == com.richotaru.notificationapi.enums.PricingPlan.PROFESSIONAL){
-                return Bandwidth.classic(emailRequestLimitProf, Refill.intervally(emailRequestLimitProf, Duration.ofMinutes(1)));
-            }
-        }
-        return Bandwidth.classic(2, Refill.intervally(2, Duration.ofMinutes(1)));
     }
-    private com.richotaru.notificationapi.enums.PricingPlan getPricingPlan(String apiKey) {
-        if (apiKey == null || apiKey.isEmpty()) {
-            return com.richotaru.notificationapi.enums.PricingPlan.FREE;
-        } else if (apiKey.startsWith("PX001-")) {
-            return com.richotaru.notificationapi.enums.PricingPlan.PROFESSIONAL;
-        } else if (apiKey.startsWith("BX001-")) {
-            return com.richotaru.notificationapi.enums.PricingPlan.BASIC;
+    private List<Bandwidth> getClientSmsBandWidths(String apiKey) {
+        List<Bandwidth> bandwidths = new ArrayList<>();
+        if (apiKey != null && !apiKey.isEmpty()) {
+            Optional<ClientAccount> optionalClientAccount = clientAccountRepository.findByApiKeyAndStatus(apiKey, GenericStatusConstant.ACTIVE);
+            if(optionalClientAccount.isPresent()){
+                SubscriptionPlan subscriptionPlan = optionalClientAccount.get().getSubscriptionPlan();
+
+                Long maxMonthlySmsLimit = subscriptionPlan.getMaxMonthlySmsLimit();
+                if(maxMonthlySmsLimit !=null){
+                    Bandwidth monthlySmsBandwidth = Bandwidth.classic(maxMonthlySmsLimit, Refill.intervally(maxMonthlySmsLimit,
+                            Duration.ofDays(30)));
+
+                    long daily = Math.floorDiv(maxMonthlySmsLimit , 30);
+                    Bandwidth dailySmsBandwidth = Bandwidth.classic(daily, Refill.intervally(daily,
+                            Duration.ofDays(1)));
+
+                    long hourly = Math.floorDiv(daily , 24);
+                    Bandwidth hourlySmsBandwidth = Bandwidth.classic(hourly, Refill.intervally(hourly,
+                            Duration.ofHours(1)));
+
+                    long minutes = Math.floorDiv(daily , 60);
+                     minutes = minutes > smsRequestLimitFree ? minutes : smsRequestLimitFree;
+                    Bandwidth minuteSmsBandwidth = Bandwidth.classic(minutes, Refill.intervally(minutes,
+                            Duration.ofMinutes(1)));
+
+                    bandwidths.add(monthlySmsBandwidth);
+                    bandwidths.add(dailySmsBandwidth);
+                    bandwidths.add(hourlySmsBandwidth);
+                    bandwidths.add(minuteSmsBandwidth);
+                }
+                return bandwidths;
+            }
         }
-        return com.richotaru.notificationapi.enums.PricingPlan.FREE;
+        bandwidths.add(Bandwidth.classic(smsRequestLimitFree, Refill.intervally(smsRequestLimitFree, Duration.ofMinutes(1))));
+        return bandwidths;
+    }
+
+    private List<Bandwidth> getClientEmailBandWidths(String apiKey) {
+        List<Bandwidth> bandwidths = new ArrayList<>();
+        if (apiKey != null && !apiKey.isEmpty()) {
+            Optional<ClientAccount> optionalClientAccount = clientAccountRepository.findByApiKeyAndStatus(apiKey, GenericStatusConstant.ACTIVE);
+            if(optionalClientAccount.isPresent()){
+                SubscriptionPlan subscriptionPlan = optionalClientAccount.get().getSubscriptionPlan();
+                Long maxMonthlyEmailLimit = subscriptionPlan.getMaxMonthlyEmailLimit();
+                if(maxMonthlyEmailLimit !=null){
+                    Bandwidth monthlyEmailBandwith = Bandwidth.classic(maxMonthlyEmailLimit, Refill.intervally(maxMonthlyEmailLimit,
+                            Duration.ofDays(30)));
+                    bandwidths.add(monthlyEmailBandwith);
+
+                    long daily = Math.floorDiv(maxMonthlyEmailLimit , 30);
+                    Bandwidth dailyEmailBandwidth = Bandwidth.classic(daily, Refill.intervally(daily,
+                            Duration.ofDays(1)));
+
+                    long hourly = Math.floorDiv(daily, 24);
+                    Bandwidth hourlyEmailBandwidth = Bandwidth.classic(hourly, Refill.intervally(hourly,
+                            Duration.ofHours(1)));
+
+                    long minutes = Math.floorDiv(daily , 60);
+                    minutes = minutes > emailRequestLimitFree ? minutes : emailRequestLimitFree;
+                    Bandwidth minuteEmailBandwidth = Bandwidth.classic(minutes, Refill.intervally(minutes,
+                            Duration.ofMinutes(1)));
+
+                    bandwidths.add(monthlyEmailBandwith);
+                    bandwidths.add(dailyEmailBandwidth);
+                    bandwidths.add(hourlyEmailBandwidth);
+                    bandwidths.add(minuteEmailBandwidth);
+                }
+
+                return bandwidths;
+            }
+        }
+        bandwidths.add(Bandwidth.classic(emailRequestLimitFree, Refill.intervally(emailRequestLimitFree, Duration.ofMinutes(1))));
+        return bandwidths;
     }
 }

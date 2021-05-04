@@ -8,9 +8,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Data
 public class EmailConfig {
-    @Value("${EMAIL_NOTIFICATION_ADDRESS}")
+    @Value("${EMAIL_NOTIFICATION_ADDRESS:email@domain.com}")
     public String EMAIL_NOTIFICATION_ADDRESS;
-    @Value("${EMAIL_NOTIFICATION_PASSWORD}")
+    @Value("${EMAIL_NOTIFICATION_PASSWORD:password}")
     public String EMAIL_NOTIFICATION_PASSWORD;
     @Value("${SMTP_PORT:587}")
     public Integer SMTP_PORT;
