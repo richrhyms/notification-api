@@ -11,6 +11,6 @@ import java.util.List;
 public interface NotificationLogRepository extends JpaRepository<NotificationRequestLog, Long> {
 
     @Query("select rl from NotificationRequestLog rl" +
-            " where lower(rl.clientApiKey) = lower(?1)")
-    List<NotificationRequestLog> findByApiKey(String apiKey);
+            " where lower(rl.clientName) = lower(?1)")
+    List<NotificationRequestLog> findByClientName(String clientName);
 }

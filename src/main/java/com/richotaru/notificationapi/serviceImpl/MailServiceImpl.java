@@ -11,11 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
+
 @Service
 public class MailServiceImpl implements MailService {
 
-    private EmailConfig emailConfig;
+    private final EmailConfig emailConfig;
 
     @Autowired
     public MailServiceImpl(EmailConfig emailConfig) {
@@ -34,7 +34,7 @@ public class MailServiceImpl implements MailService {
             email.setStartTLSEnabled(true);
             email.send();
         } catch (EmailException ex) {
-            throw new RuntimeException(ex);
+//            throw new RuntimeException(ex);
         }
     }
 }

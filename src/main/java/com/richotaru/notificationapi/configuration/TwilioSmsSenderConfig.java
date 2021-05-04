@@ -1,17 +1,27 @@
 package com.richotaru.notificationapi.configuration;
 
 
+import com.richotaru.notificationapi.service.SettingService;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@Configuration
+import javax.annotation.PostConstruct;
+
+
 @Data
+@Component
 public class TwilioSmsSenderConfig {
-    @Value("${TWILIO_ACCOUNT_SID:sid}")
     private String ACCOUNT_SID;
-    @Value("${TWILIO_AUTH_TOKEN:token}")
     private String AUTH_TOKEN;
-    @Value("${TWILIO_SENDER_NUMBER:+17135972411}")
     private String SENDER_NUMBER;
+    @Autowired
+    private SettingService settingService;
+
+    @PostConstruct()
+    public void init() {
+        this.AUTH_TOKEN = settingService.getString("TWILIO_AUTH_TOKEN","nothing");
+        this.ACCOUNT_SID = settingService.getString("TWILIO_ACCOUNT_SID","nothing");
+        this.SENDER_NUMBER = settingService.getString("TWILIO_SENDER_NUMBER","nothing");
+    }
 }

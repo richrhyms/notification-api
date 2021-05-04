@@ -8,6 +8,7 @@ import com.richotaru.notificationapi.dao.ClientAccountRepository;
 import com.richotaru.notificationapi.entity.ClientAccount;
 import com.richotaru.notificationapi.enumeration.GenericStatusConstant;
 import com.richotaru.notificationapi.enums.PricingPlan;
+import com.richotaru.notificationapi.service.SettingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,27 +25,25 @@ import java.time.LocalDateTime;
 
 @Component
 public class DefaultClientSetup {
-    @Value("${EMAIL_LIMIT_PROF:1800000}")
-    private Long emailRequestLimitProf;
-    @Value("${EMAIL_LIMIT_BASIC:180000}")
-    private Long emailRequestLimitBasic;
-    @Value("${SMS_LIMIT_PROF:1200000}")
-    private Long smsRequestLimitProf;
-    @Value("${SMS_LIMIT_BASIC:120000}")
-    private Long smsRequestLimitBasic;
+
     private final TransactionTemplate transactionTemplate;
     private final ClientAccountRepository clientAccountRepository;
     private final SubscriptionPlanRepository subscriptionPlanRepository;
     private final AppRepository appRepository;
+    private final SettingService settingService;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    public DefaultClientSetup(TransactionTemplate transactionTemplate, ClientAccountRepository clientAccountRepository,
-                              SubscriptionPlanRepository subscriptionPlanRepository, AppRepository appRepository) {
+    public DefaultClientSetup(TransactionTemplate transactionTemplate,
+                              ClientAccountRepository clientAccountRepository,
+                              SubscriptionPlanRepository subscriptionPlanRepository,
+                              AppRepository appRepository,
+                              SettingService settingService) {
         this.transactionTemplate = transactionTemplate;
         this.clientAccountRepository = clientAccountRepository;
         this.subscriptionPlanRepository = subscriptionPlanRepository;
         this.appRepository = appRepository;
+        this.settingService = settingService;
     }
 
 
@@ -52,6 +51,7 @@ public class DefaultClientSetup {
     public void init() {
         transactionTemplate.execute(tx -> {
             try {
+
                     // CREATING PROFESSIONAL CLIENT
                     clientAccountRepository.findByDisplayNameAndStatus("DEFAULT_PROFESSIONAL_CLIENT", GenericStatusConstant.ACTIVE)
                             .orElseGet(() -> {
@@ -60,6 +60,9 @@ public class DefaultClientSetup {
                                 SubscriptionPlan subscriptionPlan = subscriptionPlanRepository.findByName(PricingPlan.PROFESSIONAL.name())
                                         .orElseGet(
                                         ()->{
+                                            Long emailRequestLimitProf = settingService.getLong("EMAIL_LIMIT_PROF", 180000);
+                                            Long smsRequestLimitProf = settingService.getLong("SMS_LIMIT_PROF", 120000);
+
                                             SubscriptionPlan plan =  new SubscriptionPlan();
                                             plan.setName(PricingPlan.PROFESSIONAL.name());
                                             plan.setDescription(PricingPlan.PROFESSIONAL.name() + " Service");
@@ -95,7 +98,11 @@ public class DefaultClientSetup {
                             SubscriptionPlan subscriptionPlan = subscriptionPlanRepository.findByName(PricingPlan.BASIC.name())
                                     .orElseGet(
                                             ()->{
+                                                Long emailRequestLimitBasic= settingService.getLong("EMAIL_LIMIT_BASIC", 18000);
+                                                Long smsRequestLimitBasic = settingService.getLong("SMS_LIMIT_BASIC", 12000);
+
                                                 SubscriptionPlan plan =  new SubscriptionPlan();
+
                                                 plan.setName(PricingPlan.BASIC.name());
                                                 plan.setDescription(PricingPlan.BASIC.name() + " Service");
                                                 plan.setMaxMonthlyEmailLimit(emailRequestLimitBasic);

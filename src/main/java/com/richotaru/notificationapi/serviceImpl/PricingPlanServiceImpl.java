@@ -6,10 +6,10 @@ import com.richotaru.notificationapi.entity.SubscriptionPlan;
 import com.richotaru.notificationapi.enumeration.GenericStatusConstant;
 import com.richotaru.notificationapi.enums.MessageDeliveryChannelConstant;
 import com.richotaru.notificationapi.service.PricingPlanService;
+import com.richotaru.notificationapi.service.SettingService;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Refill;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -19,13 +19,20 @@ import java.util.Optional;
 
 @Service
 public class PricingPlanServiceImpl implements PricingPlanService {
-    @Value("${EMAIL_LIMIT_FREE:2}")
-    private Long emailRequestLimitFree;
-    @Value("${SMS_LIMIT_FREE:2}")
-    private Long smsRequestLimitFree;
+
+    private final Long emailRequestLimitFree;
+    private final Long smsRequestLimitFree;
+
+    private final ClientAccountRepository clientAccountRepository;
+    private final SettingService settingService;
 
     @Autowired
-    private ClientAccountRepository clientAccountRepository;
+    public PricingPlanServiceImpl(ClientAccountRepository clientAccountRepository, SettingService settingService) {
+        this.clientAccountRepository = clientAccountRepository;
+        this.settingService = settingService;
+        this.emailRequestLimitFree = settingService.getLong("EMAIL_LIMIT_FREE", 2);
+        this.smsRequestLimitFree = settingService.getLong("SMS_LIMIT_FREE",2);
+    }
 
     @Override
     public List<Bandwidth> resolveBandWidthFromApiKeyAndType(String apiKey, MessageDeliveryChannelConstant type) {
@@ -56,7 +63,9 @@ public class PricingPlanServiceImpl implements PricingPlanService {
                             Duration.ofHours(1)));
 
                     long minutes = Math.floorDiv(daily , 60);
-                     minutes = minutes > smsRequestLimitFree ? minutes : smsRequestLimitFree;
+
+                    minutes = minutes > smsRequestLimitFree ? minutes : smsRequestLimitFree;
+
                     Bandwidth minuteSmsBandwidth = Bandwidth.classic(minutes, Refill.intervally(minutes,
                             Duration.ofMinutes(1)));
 

@@ -19,14 +19,12 @@ import java.util.List;
 public class SmsSenderSenderServiceImpl implements SmsSenderService {
 
     private final Environment environment;
-
     private final TwilioSmsSenderConfig twilioSmsSenderConfig;
-
     SmsProviderConstant SMS_PROVIDER;
 
 
     @Autowired
-    public SmsSenderSenderServiceImpl(Environment environment, TwilioSmsSenderConfig twilioSmsSenderConfig) {
+    public SmsSenderSenderServiceImpl(Environment environment,TwilioSmsSenderConfig twilioSmsSenderConfig) {
         this.environment = environment;
         this.twilioSmsSenderConfig = twilioSmsSenderConfig;
     }

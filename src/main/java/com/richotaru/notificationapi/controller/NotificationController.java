@@ -1,7 +1,9 @@
 package com.richotaru.notificationapi.controller;
 
+import com.richotaru.notificationapi.dao.NotificationLogRepository;
 import com.richotaru.notificationapi.domain.dto.EmailRequestDto;
 import com.richotaru.notificationapi.domain.dto.SmsRequestDto;
+import com.richotaru.notificationapi.entity.NotificationRequestLog;
 import com.richotaru.notificationapi.enums.PricingPlan;
 import com.richotaru.notificationapi.service.MailService;
 import com.richotaru.notificationapi.service.NotificationService;
@@ -10,20 +12,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.websocket.server.PathParam;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/notification")
 public class NotificationController {
     @Autowired
     private NotificationService notificationService;
-    @Autowired
-    private Environment environment;
+
+
+    @GetMapping("{senderName}")
+    public ResponseEntity<List<NotificationRequestLog>> getNotificationLogs(@PathVariable("senderName") String clientName){
+        return ResponseEntity.status(HttpStatus.OK).body(notificationService.getNotificationLogs(clientName));
+    }
 
     @PostMapping("email")
     public ResponseEntity<String> sendEmailNotification(@Valid @RequestBody EmailRequestDto requestDto){

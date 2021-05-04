@@ -1,20 +1,30 @@
 package com.richotaru.notificationapi.configuration;
 
 
+import com.richotaru.notificationapi.service.SettingService;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+import javax.annotation.PostConstruct;
+
+
 @Data
+@Component
 public class EmailConfig {
-    @Value("${EMAIL_NOTIFICATION_ADDRESS:email@domain.com}")
+    @Autowired
+    private SettingService settingService;
     public String EMAIL_NOTIFICATION_ADDRESS;
-    @Value("${EMAIL_NOTIFICATION_PASSWORD:password}")
     public String EMAIL_NOTIFICATION_PASSWORD;
-    @Value("${SMTP_PORT:587}")
     public Integer SMTP_PORT;
-    @Value("${SMTP_HOST:smtp.mailgun.org}")
     public String SMTP_HOST;
 
+    @PostConstruct()
+    public void init() {
+        this.EMAIL_NOTIFICATION_ADDRESS = settingService.getString("EMAIL_NOTIFICATION_ADDRESS","nothing");
+        this.EMAIL_NOTIFICATION_PASSWORD = settingService.getString("EMAIL_NOTIFICATION_PASSWORD","nothing");
+        this.SMTP_PORT = settingService.getInteger("SMTP_PORT",587);
+        this.SMTP_HOST = settingService.getString("TWILIO_SENDER_NUMBER","nothing");
+    }
 }
